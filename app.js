@@ -1,7 +1,4 @@
-     const  {addition} =  require(`./addition.js`)
-     const  {subtraction} =  require(`./subtraction.js`)
-     const  {division} =  require(`./division.js`)
-     const  {multiplication} =  require(`./multiplication.js`)
+const { addition, subtraction, division, multiplication } = require('./calculateSum');
      
 
 
