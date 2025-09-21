@@ -1,11 +1,12 @@
 const express = require(`express`)
 const { connectDB } = require("./config/config")
-const { User } = require("./model/user")
+const { User, Post } = require("./model/user")
 const cookieParser = require("cookie-parser");
 const jwt = require("jsonwebtoken");
 const app = express()
 const validator = require('validator')
-const bcrypt = require(`bcrypt`)
+const bcrypt = require(`bcrypt`);
+const { profile, auth } = require("./middleware/user");
 
 app.use(express.json())
 app.use(cookieParser());
@@ -15,8 +16,9 @@ app.post('/signup', async (req, res) => {
     try {
         const { firstName, lastName, password, email } = req.body
         // console.log(firstName, lastName, password, email );
-
-
+      const existingUser = await User.findOne({ email });
+    if (existingUser) return res.status(400).json({ msg: "User already exists" });
+               
         if (!firstName || !lastName) {
             throw new Error('invalid name')
         }
@@ -75,10 +77,46 @@ app.post(`/login`, async (req, res) => {
     }
 
 })
+
  app.post("/logout", (req, res) => {
-  res.clearCookie("token"); // cookie delete
+  res.clearCookie("token"); 
   res.json({ msg: "Logout successful ✅" });
 });
+
+
+
+app.post("/posts", auth, async (req, res) => {
+  const { title, content } = req.body;
+  const post = await Post.create({ title, content, user: req.user });
+  res.json({ msg: "Post created ✅", post });
+});
+
+app.get("/posts", auth, async (req, res) => {
+  const posts = await Post.find({ user: req.user });
+  res.json(posts);
+});
+
+
+app.put("/posts/:id", auth, async (req, res) => {
+  const { title, content } = req.body;
+  const post = await Post.findOneAndUpdate(
+    { _id: req.params.id, user: req.user },
+    { title, content },
+    { new: true }
+  );
+  if (!post) return res.status(404).json({ msg: "Post not found or not authorized" });
+  res.json({ msg: "Post updated ✅", post });
+});
+
+
+app.delete("/posts/:id", auth, async (req, res) => {
+  const post = await Post.findOneAndDelete({ _id: req.params.id, user: req.user });
+  if (!post) return res.status(404).json({ msg: "Post not found or not authorized" });
+  res.json({ msg: "Post deleted ✅" });
+})
+
+
+
 
 
 connectDB().then(() => {
