@@ -2,7 +2,7 @@ const { addition, subtraction, division, multiplication } = require('./calculate
      
 
 
-     addition(45 , 56)
-     subtraction(54 , 12)
-     division(78 , 2)
-     multiplication(21 ,65)
+     addition(54 , 06)
+     subtraction(76 , 12)
+     division(78 , 27)
+     multiplication(20 ,65)
